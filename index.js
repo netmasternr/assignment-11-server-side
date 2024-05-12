@@ -37,8 +37,7 @@ async function run() {
 
         const applicantsCollection = client.db('skillsphere').collection('applicants')
 
-
-
+ 
 
         // get all jobs data from db
         app.get('/jobs', async (req, res) => {
@@ -47,7 +46,6 @@ async function run() {
             res.send(result)
 
         })
-
 
 
 
