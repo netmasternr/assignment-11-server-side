@@ -32,6 +32,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         const jobsCollection = client.db('skillsphere').collection('jobs')
+        // applicant collection
         const applicantsCollection = client.db('skillsphere').collection('applicants')
 
 
@@ -68,6 +69,17 @@ async function run() {
             res.send(result)
         });
 
+
+        // applicant data
+        app.post('/applicant', async (req, res) => {
+            const applicantData = req.body
+            console.log(applicantData)
+
+            const result = await applicantsCollection.insertOne(applicantData)
+            console.log(result)
+            
+            res.send(result)
+        })
 
 
 
