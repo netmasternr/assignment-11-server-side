@@ -74,10 +74,8 @@ async function run() {
         app.post('/applicant', async (req, res) => {
             const applicantData = req.body
             // console.log(applicantData)
-
             const result = await applicantsCollection.insertOne(applicantData)
             // console.log(result)
-
             res.send(result)
         })
 
@@ -85,15 +83,18 @@ async function run() {
         app.get('/apJobs/:email', async (req, res) => {
             const email = req.params.email
             const query = { userEmail: email }
-
-            console.log(query)
-
             const result = await applicantsCollection.find(query).toArray()
-
             res.send(result)
         })
 
+        // delete posted job
+        app.delete('/Job/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
 
+            const result = await jobsCollection.deleteOne(query)
+            res.send(result)
+        })
 
 
 
