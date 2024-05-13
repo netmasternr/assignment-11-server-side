@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -16,8 +16,6 @@ const corsOption = {
 app.use(cors(corsOption));
 app.use(express.json());
 
-console.log(process.env.DB_PASS)
-console.log(process.env.DB_USER)
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.zudvrkg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -34,18 +32,42 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         const jobsCollection = client.db('skillsphere').collection('jobs')
-
         const applicantsCollection = client.db('skillsphere').collection('applicants')
 
- 
+
+
+        // add job post
+        app.post('/jobs', async (req, res) => {
+            const jobsData = req.body
+            // console.log(jobsData)
+            const result = await jobsCollection.insertOne(jobsData)
+            res.send(result)
+        })
+
 
         // get all jobs data from db
         app.get('/jobs', async (req, res) => {
             const result = await jobsCollection.find().toArray()
-
             res.send(result)
-
         })
+
+
+        // get a single job data 
+        app.get('/singleJob/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await jobsCollection.findOne(query);
+            res.send(result)
+        })
+
+
+        // my jobs
+        app.get('/myJobs/:email', async (req, res) => {
+            // console.log(req.params.email);
+            const result = await jobsCollection.find({ email: req.params.email }).toArray();
+            res.send(result)
+        });
+
 
 
 
