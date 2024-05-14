@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
@@ -8,12 +9,14 @@ const port = process.env.PORT || 5000;
 
 
 // middleware
-const corsOption = {
-    origin: ['http://localhost:5173'],
-    Credentials: true,
-    optionSuccessStatus: 200,
-}
-app.use(cors(corsOption));
+
+app.use(cors({
+    origin: [
+        'http://localhost:5173'
+    ],
+    credentials: true
+
+}));
 app.use(express.json());
 
 
@@ -36,7 +39,35 @@ async function run() {
         const applicantsCollection = client.db('skillsphere').collection('applicants')
 
 
+        // auth related api
+        app.post('/jwt', async (req, res) => {
+            const user = req.body;
+            console.log('user for token', user)
 
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'strict'
+
+            })
+                .send({ success: true });
+        })
+
+
+
+        // logout cookie
+        app.post('/logOut', async (req, res) => {
+            const user = req.body
+            console.log('logging out user', user)
+            res.clearCookie('token', { maxAge: 0 }).send({ success: true })
+        })
+
+
+
+
+        // services related api start
         // add job post
         app.post('/jobs', async (req, res) => {
             const jobsData = req.body
