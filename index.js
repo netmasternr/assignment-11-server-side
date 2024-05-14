@@ -70,7 +70,7 @@ async function run() {
         // auth related api
         app.post('/jwt', async (req, res) => {
             const user = req.body;
-            console.log('user for token', user)
+            // console.log('user for token', user)
 
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
 
@@ -88,7 +88,7 @@ async function run() {
         // logout cookie
         app.post('/logOut', async (req, res) => {
             const user = req.body
-            console.log('logging out user', user)
+            // console.log('logging out user', user)
             res.clearCookie('token', { maxAge: 0 }).send({ success: true })
         })
 
@@ -122,7 +122,7 @@ async function run() {
         // my jobs with secure jwt logger
         app.get('/myJobs/:email', logger, verifyToken, async (req, res) => {
             // console.log(req.params.email);
-            console.log('token owner info', req.user)
+            // console.log('token owner info', req.user)
 
             if(req.user.email !== req.params.email){
                 return res.status(403).send({message: 'forbidden access'})
