@@ -12,7 +12,9 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(cors({
     origin: [
-        'http://localhost:5173'
+        'http://localhost:5173',
+        'https://skills-sphere-efc98.web.app',
+        'https://skills-sphere-efc98.firebaseapp.com'
     ],
     credentials: true
 }));
@@ -60,6 +62,18 @@ const verifyToken = (req, res, next) => {
     })
 }
 
+// cookie config for deploy
+const cookeOption = {
+    httpOnly: true,
+
+    secure: process.env.NODE_ENV === "production" ? true : false,
+
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+}
+
+
+
+
 async function run() {
     try {
         const jobsCollection = client.db('skillsphere').collection('jobs')
@@ -74,12 +88,7 @@ async function run() {
 
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
 
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'none'
-
-            })
+            res.cookie('token', token, cookeOption)
                 .send({ success: true });
         })
 
@@ -89,7 +98,7 @@ async function run() {
         app.post('/logOut', async (req, res) => {
             const user = req.body
             // console.log('logging out user', user)
-            res.clearCookie('token', { maxAge: 0 }).send({ success: true })
+            res.clearCookie('token', { ...cookeOption, maxAge: 0 }).send({ success: true })
         })
 
 
@@ -124,8 +133,8 @@ async function run() {
             // console.log(req.params.email);
             // console.log('token owner info', req.user)
 
-            if(req.user.email !== req.params.email){
-                return res.status(403).send({message: 'forbidden access'})
+            if (req.user.email !== req.params.email) {
+                return res.status(403).send({ message: 'forbidden access' })
             }
 
             const result = await jobsCollection.find({ email: req.params.email }).toArray();
@@ -146,8 +155,8 @@ async function run() {
         app.get('/apJobs/:email', logger, verifyToken, async (req, res) => {
             const email = req.params.email
 
-            if(req.user.email !== req.params.email){
-                return res.status(403).send({message: 'forbidden access'})
+            if (req.user.email !== req.params.email) {
+                return res.status(403).send({ message: 'forbidden access' })
             }
 
             const query = { userEmail: email }
@@ -186,7 +195,7 @@ async function run() {
 
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
